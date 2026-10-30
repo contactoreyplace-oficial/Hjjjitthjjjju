@@ -1,0 +1,105 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Perfil de usuario autenticado para la sincronización de vigilancia en la nube",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "SecurityIncident": {
+      "title": "SecurityIncident",
+      "description": "Registro forense de eventos de seguridad, personas detectadas y cámaras espía",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["motion", "person", "lens_glint", "recording_started", "recording_saved", "stealth_engaged", "vault_unauthorized", "vault_unlocked", "camera_power"] },
+        "title": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 512 },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "title", "severity"]
+    },
+    "EvidenceRecording": {
+      "title": "EvidenceRecording",
+      "description": "Registro de evidencias multimedia de video o foto capturadas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 256 },
+        "timestamp": { "type": "string", "maxLength": 64 },
+        "duration": { "type": "number" },
+        "sizeFormatted": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["video", "audio", "snapshot"] },
+        "trigger": { "type": "string", "enum": ["manual", "motion", "person", "hidden_cam"] },
+        "thumbnailUrl": { "type": "string", "maxLength": 1000000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "type", "trigger"]
+    },
+    "DeviceConfig": {
+      "title": "DeviceConfig",
+      "description": "Configuración de detección y sensibilidad del usuario",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "maxLength": 128 },
+        "motionSensitivity": { "type": "number" },
+        "personSensitivity": { "type": "number" },
+        "glintSensitivity": { "type": "number" },
+        "detectionBoost": { "type": "number" },
+        "autoRecordOnDetection": { "type": "boolean" },
+        "pushNotifications": { "type": "boolean" },
+        "soundAlarm": { "type": "boolean" },
+        "vibrationAlert": { "type": "boolean" },
+        "pirSensitivity": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    },
+    "DetectionProfile": {
+      "title": "DetectionProfile",
+      "description": "Preajustes de detección guardados por el usuario",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "config": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "config"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Documento de perfil del usuario propietario de las grabaciones"
+    },
+    "/users/{userId}/incidents/{incidentId}": {
+      "schema": { "$ref": "#/entities/SecurityIncident" },
+      "description": "Registro de incidentes y detecciones forenses del usuario"
+    },
+    "/users/{userId}/recordings/{recordingId}": {
+      "schema": { "$ref": "#/entities/EvidenceRecording" },
+      "description": "Evidencias y grabaciones capturadas por el dispositivo"
+    },
+    "/users/{userId}/config/{configId}": {
+      "schema": { "$ref": "#/entities/DeviceConfig" },
+      "description": "Configuración de sensibilidad y parámetros de vigilancia"
+    },
+    "/users/{userId}/profiles/{profileId}": {
+      "schema": { "$ref": "#/entities/DetectionProfile" },
+      "description": "Perfiles de detección guardados"
+    }
+  }
+}

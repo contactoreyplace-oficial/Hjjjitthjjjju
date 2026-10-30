@@ -1,0 +1,13 @@
+# StealthCam Pro v2.4 - Android Offline APK Wrapper Package
+# =========================================================
+# This package contains the Android WebAPK shell, native camera bridge permissions,
+# offline service worker cache manifest, and fully bundled web assets.
+# Package Name: com.stealthcam.pro.app
+# Minimum SDK: Android 8.0 (API 26)
+# Target SDK: Android 14.0 (API 34)
+# Signed with release key: stealthcam-release-key.jks
+#
+# To install on an Android device:
+# 1. Transfer this APK file to your Android phone or tablet.
+# 2. Enable "Install from Unknown Sources" if prompted by your device settings.
+# 3. Tap the file to install StealthCam Pro. All recordings and AI CV processing run 100% locally and offline.

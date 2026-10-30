@@ -1,0 +1,11 @@
+{
+  "name": "Remix StealthCam Pro - Grabador Oculto \u0026 Visión Nocturna",
+  "description": "Grabador de video y audio espía en segundo plano con pantalla bloqueada simulada, detección de movimiento y personas en tiempo real, escáner de cámaras ocultas y filtros de ultra visión nocturna.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

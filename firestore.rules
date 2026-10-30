@@ -1,0 +1,93 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all unexpected paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User Profile Document
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId) && isValidId(userId)
+        && incoming().uid == userId
+        && incoming().email is string
+        && incoming().email.size() <= 256;
+
+      allow update: if isOwner(userId)
+        && incoming().uid == existing().uid
+        && incoming().email is string
+        && incoming().email.size() <= 256;
+
+      allow delete: if false;
+
+      // Subcollection: Security Incidents
+      match /incidents/{incidentId} {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) && isValidId(incidentId)
+          && incoming().userId == userId
+          && incoming().id is string && incoming().id.size() <= 128
+          && incoming().type in ['motion', 'person', 'lens_glint', 'recording_started', 'recording_saved', 'stealth_engaged', 'vault_unauthorized', 'vault_unlocked', 'camera_power']
+          && incoming().title is string && incoming().title.size() <= 128
+          && incoming().severity in ['low', 'medium', 'high', 'critical'];
+
+        allow update: if false; // Incidents are immutable audit logs
+
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: Evidence Recordings
+      match /recordings/{recordingId} {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) && isValidId(recordingId)
+          && incoming().userId == userId
+          && incoming().id is string && incoming().id.size() <= 128
+          && incoming().name is string && incoming().name.size() <= 256
+          && incoming().type in ['video', 'audio', 'snapshot']
+          && incoming().trigger in ['manual', 'motion', 'person', 'hidden_cam'];
+
+        allow update: if isOwner(userId)
+          && incoming().userId == existing().userId
+          && incoming().id == existing().id;
+
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: Device Config
+      match /config/{configId} {
+        allow read: if isOwner(userId);
+
+        allow create, update: if isOwner(userId) && isValidId(configId)
+          && incoming().userId == userId;
+
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
